@@ -11,28 +11,28 @@ module FCM
 
   @api_key = nil #Should set the fcm api_key here if you don't want to provide it in the client code.
 
-  GROUP_NOTIFICATION_BASE_URI = 'https://android.googleapis.com/gcm'
+  GROUP_NOTIFICATION_BASE_URI = 'https://fcm.googleapis.com/fcm'
 
   class << self
     attr_accessor :timeout, :api_key
   end
 
-  def self.send_notification(registration_id, data={}, options={}, api_key=nil)
-    self.send_notifications(registration_id, data, options, api_key)
+  def self.send_notification(registration_id, data={}, options={})
+    self.send_notifications(registration_id, data, options)
   end
 
-  def self.send_notifications(registration_ids, data={}, options = {}, api_key = nil)
-    self.set_api_key api_key
-
+  def self.send_notifications(registration_ids, data={}, options = {})
     notification = Notification.new(registration_ids, data, options)
     self.prepare_and_send(notification)
   end
 
 
   def self.prepare_and_send(notification)
-    notification_ids = notification.notifications_ids
+    registration_ids = notification.registration_ids
 
-    post_body = build_post_body(notification_ids, notification.get_options)
+    post_body = build_post_body(registration_ids, notification.get_options)
+
+    puts "[FCM::to_json] #{post_body.to_json}"
 
     params = {
         body: post_body.to_json,
@@ -43,9 +43,9 @@ module FCM
     }
 
     response = self.post('/send', params)
-    build_response(response, notification_ids)
+    build_response(response, registration_ids)
   end
-
+=begin
   def self.create_notification_key(key_name, project_id, registration_ids = [], api_key = nil)
     self.set_api_key api_key
 
@@ -141,7 +141,7 @@ module FCM
       send_with_notification_key('/topics/' + topic, options)
     end
   end
-
+=end
   private
 
   def self.set_api_key(api_key)
@@ -157,7 +157,11 @@ module FCM
 
   def self.build_post_body(registration_ids, options = {})
     ids = registration_ids.is_a?(String) ? [registration_ids] : registration_ids
-    {registration_ids: ids}.merge(options)
+    data = {:data => options}
+    puts " merging data #{data}"
+    result = {registration_ids: ids}.merge({:data => options})
+    puts " merging data #{result}"
+    {registration_ids: ids}.merge({:data => options})
   end
 
   def self.build_response(response, registration_ids = [])
