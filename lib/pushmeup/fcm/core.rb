@@ -91,6 +91,9 @@ module FCM
       else
         response_hash[:response] = 'Unknown Error from API.'
     end
+
+    Rails.logger.info "[Pushmeup::FCM::response] response hash json #{response_hash.to_json}"
+
     response_hash
   end
 
