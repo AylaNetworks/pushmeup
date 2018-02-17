@@ -67,39 +67,34 @@ module APNSV3
   protected
 
   def self.ssl_context
+    @certificate = self.certificate
     ctx = OpenSSL::SSL::SSLContext.new
     begin
-      Rails.logger.info "[Pushmeup::APNSV3::ssl_context] getting ssl_context --- here 1"
-      p12 = OpenSSL::PKCS12.new(self.certificate, @pass)
+      Rails.logger.debug "[Pushmeup::APNSV3::ssl_context] getting ssl_context for PKCS12"
+      p12 = OpenSSL::PKCS12.new(@certificate, @pass)
       ctx.key = p12.key
       ctx.cert = p12.certificate
     rescue OpenSSL::PKCS12::PKCS12Error
-      Rails.logger.info "[Pushmeup::APNSV3::ssl_context] getting ssl_context --- here 2"
-      ctx.key = OpenSSL::PKey::RSA.new(self.certificate, @pass)
-      ctx.cert = OpenSSL::X509::Certificate.new(self.certificate)
+      Rails.logger.debug "[Pushmeup::APNSV3::ssl_context] getting ssl_context for PKey.RSA"
+      ctx.key = OpenSSL::PKey::RSA.new(@certificate, @pass)
+      ctx.cert = OpenSSL::X509::Certificate.new(@certificate)
     end
     ctx
   end
 
   def self.certificate
-    Rails.logger.info "[Pushmeup::APNSV3::certificate] getting certificate --- here 0"
-    #unless @certificate
-      Rails.logger.info "[Pushmeup::APNSV3::certificate] getting certificate --- here 1"
       if @pem.respond_to?(:read)
         cert = @pem.read
         @pem.rewind if @pem.respond_to?(:rewind)
       else
         begin
-          Rails.logger.info "[Pushmeup::APNSV3::certificate] getting certificate --- here 2"
           cert = File.read(@pem)
         rescue SystemCallError => e
-          Rails.logger.info "[Pushmeup::APNSV3::certificate] getting certificate --- here 3"
           Rails.logger.info "[Pushmeup::APNSV3::certificate] Does not understand read and its not a path to a file or directory, setting as plain string."
           cert = @pem
         end
       end
       @certificate = cert
-    #end
     Rails.logger.debug "[Pushmeup::APNSV3::certificate] Returning certificate set"
     @certificate
   end
@@ -108,10 +103,7 @@ module APNSV3
     begin
       ext = self.extension(UNIVERSAL_CERTIFICATE_EXTENSION)
       seq = OpenSSL::ASN1.decode(OpenSSL::ASN1.decode(ext.to_der).value[1].value)
-      response = seq.select.with_index { |_, index| index.even? }.map(&:value)
-      Rails.logger.info "[Pushmeup::APNSV3::topics]  returning topic #{response[0]}"
-      Rails.logger.info "[Pushmeup::APNSV3::topics]  from app_bundle_id #{self.app_bundle_id}"
-      response
+      seq.select.with_index { |_, index| index.even? }.map(&:value)
     rescue Exception => e
       Rails.logger.error "[Pushmeup::APNSV3::topics] exception"
       [self.app_bundle_id]
