@@ -19,9 +19,10 @@ module APNSV3
 
   @host = nil
   @port = 443
+  @topic = nil
 
   class << self
-    attr_accessor :host, :pem, :port, :pass, :logger
+    attr_accessor :host, :port, :logger
   end
 
   def self.send_notification(device_token, message, options = {})
@@ -35,8 +36,8 @@ module APNSV3
 
     @ssl_context = self.ssl_context
 
-    bundle_id = self.topics
-    message.merge!(bundle_id: bundle_id[0])
+    @topic = self.topics[0]
+    message.merge!(bundle_id: @topic)
     n = APNSV3::Notification.new(device_token, message)
     self.send_notifications([n], options)
   end
@@ -93,7 +94,7 @@ module APNSV3
       end
       @certificate = cert
     end
-    Rails.logger.info "[Pushmeup::APNSV3::certificate] Returning certificate set #{@certificate}"
+    Rails.logger.debug "[Pushmeup::APNSV3::certificate] Returning certificate set"
     @certificate
   end
 
