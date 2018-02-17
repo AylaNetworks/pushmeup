@@ -152,7 +152,7 @@ module APNSV3
 
     if status == '200'
       Rails.logger.info "[Pushmeup::APNSV3::build_response] Response successful headers: #{response.headers} and content #{response.body}"
-      {:response => 'success', :body => (response.body && response.body.length >= 2 ? JSON.parse(response.body) : nil), :headers => response.headers, :status_code => status}
+      {:response => 'success', :body => JSON.parse(response.body || '{"body":"Not Given"}'), :headers => response.headers, :status_code => status}
     else
       Rails.logger.info "[Pushmeup::APNSV3::build_response] Response . Error code #{status} and content #{response.body}"
       {:response => 'failure', :body => JSON.parse(response.body), :headers => response.headers, :status_code => status}
