@@ -80,14 +80,18 @@ module APNSV3
   end
 
   def self.certificate
+    Rails.logger.info "[Pushmeup::APNSV3::certificate] getting certificate --- here 0"
     unless @certificate
+      Rails.logger.info "[Pushmeup::APNSV3::certificate] getting certificate --- here 1"
       if @pem.respond_to?(:read)
         cert = @pem.read
         @pem.rewind if @pem.respond_to?(:rewind)
       else
         begin
+          Rails.logger.info "[Pushmeup::APNSV3::certificate] getting certificate --- here 2"
           cert = File.read(@pem)
         rescue SystemCallError => e
+          Rails.logger.info "[Pushmeup::APNSV3::certificate] getting certificate --- here 3"
           Rails.logger.info "[Pushmeup::APNSV3::certificate] Does not understand read and its not a path to a file or directory, setting as plain string."
           cert = @pem
         end
