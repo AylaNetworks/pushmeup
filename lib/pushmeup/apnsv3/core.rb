@@ -69,10 +69,12 @@ module APNSV3
   def self.ssl_context
     ctx = OpenSSL::SSL::SSLContext.new
     begin
+      Rails.logger.info "[Pushmeup::APNSV3::ssl_context] getting ssl_context --- here 1"
       p12 = OpenSSL::PKCS12.new(self.certificate, @pass)
       ctx.key = p12.key
       ctx.cert = p12.certificate
     rescue OpenSSL::PKCS12::PKCS12Error
+      Rails.logger.info "[Pushmeup::APNSV3::ssl_context] getting ssl_context --- here 2"
       ctx.key = OpenSSL::PKey::RSA.new(self.certificate, @pass)
       ctx.cert = OpenSSL::X509::Certificate.new(self.certificate)
     end
