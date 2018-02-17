@@ -102,7 +102,9 @@ module APNSV3
     begin
       ext = self.extension(UNIVERSAL_CERTIFICATE_EXTENSION)
       seq = OpenSSL::ASN1.decode(OpenSSL::ASN1.decode(ext.to_der).value[1].value)
-      seq.select.with_index { |_, index| index.even? }.map(&:value)
+      response = seq.select.with_index { |_, index| index.even? }.map(&:value)
+      Rails.logger.info "[Pushmeup::APNSV3::topics]  returning topic #{response[0]}"
+      response
     rescue Exception => e
       Rails.logger.error "[Pushmeup::APNSV3::topics] exception"
       [self.app_bundle_id]
