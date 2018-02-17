@@ -81,7 +81,7 @@ module APNSV3
 
   def self.certificate
     Rails.logger.info "[Pushmeup::APNSV3::certificate] getting certificate --- here 0"
-    unless @certificate
+    #unless @certificate
       Rails.logger.info "[Pushmeup::APNSV3::certificate] getting certificate --- here 1"
       if @pem.respond_to?(:read)
         cert = @pem.read
@@ -97,7 +97,7 @@ module APNSV3
         end
       end
       @certificate = cert
-    end
+    #end
     Rails.logger.debug "[Pushmeup::APNSV3::certificate] Returning certificate set"
     @certificate
   end
