@@ -149,10 +149,8 @@ module APNSV3
   def self.build_response(response)
     status = response.headers[':status'] if response.headers
     if response.body && response.body.length >= 2
-      Rails.logger.info "******* here 0 *******"
       body = JSON.parse response.body
     else
-      Rails.logger.info "******* here 1 *******"
       body = nil
     end
     if status == '200'
