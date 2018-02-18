@@ -19,9 +19,10 @@ module APNSV3
 
   @host = nil
   @port = 443
+  @topic = nil
 
   class << self
-    attr_accessor :host, :pem, :port, :pass, :logger
+    attr_accessor :host, :port, :logger
   end
 
   def self.send_notification(device_token, message, options = {})
@@ -35,8 +36,8 @@ module APNSV3
 
     @ssl_context = self.ssl_context
 
-    bundle_id = self.topics
-    message.merge!(bundle_id: bundle_id[0])
+    @topic = self.topics[0]
+    message.merge!(bundle_id: @topic)
     n = APNSV3::Notification.new(device_token, message)
     self.send_notifications([n], options)
   end
@@ -66,20 +67,22 @@ module APNSV3
   protected
 
   def self.ssl_context
+    @certificate = self.certificate
     ctx = OpenSSL::SSL::SSLContext.new
     begin
-      p12 = OpenSSL::PKCS12.new(self.certificate, @pass)
+      Rails.logger.debug "[Pushmeup::APNSV3::ssl_context] getting ssl_context for PKCS12"
+      p12 = OpenSSL::PKCS12.new(@certificate, @pass)
       ctx.key = p12.key
       ctx.cert = p12.certificate
     rescue OpenSSL::PKCS12::PKCS12Error
-      ctx.key = OpenSSL::PKey::RSA.new(self.certificate, @pass)
-      ctx.cert = OpenSSL::X509::Certificate.new(self.certificate)
+      Rails.logger.debug "[Pushmeup::APNSV3::ssl_context] getting ssl_context for PKey.RSA"
+      ctx.key = OpenSSL::PKey::RSA.new(@certificate, @pass)
+      ctx.cert = OpenSSL::X509::Certificate.new(@certificate)
     end
     ctx
   end
 
   def self.certificate
-    unless @certificate
       if @pem.respond_to?(:read)
         cert = @pem.read
         @pem.rewind if @pem.respond_to?(:rewind)
@@ -92,8 +95,7 @@ module APNSV3
         end
       end
       @certificate = cert
-    end
-    Rails.logger.info "[Pushmeup::APNSV3::certificate] Returning certificate set #{@certificate}"
+    Rails.logger.debug "[Pushmeup::APNSV3::certificate] Returning certificate set"
     @certificate
   end
 
@@ -145,15 +147,18 @@ module APNSV3
   end
 
   def self.build_response(response)
-
     status = response.headers[':status'] if response.headers
-
+    if response.body && response.body.length >= 2
+      body = JSON.parse response.body
+    else
+      body = nil
+    end
     if status == '200'
       Rails.logger.info "[Pushmeup::APNSV3::build_response] Response successful headers: #{response.headers} and content #{response.body}"
-      {:response => 'success', :body => JSON.parse(response.body), :headers => response.headers, :status_code => status}
+      {:response => 'success', :body => body, :headers => response.headers, :status_code => status}
     else
       Rails.logger.info "[Pushmeup::APNSV3::build_response] Response . Error code #{status} and content #{response.body}"
-      {:response => 'failure', :body => JSON.parse(response.body), :headers => response.headers, :status_code => status}
+      {:response => 'failure', :body => body, :headers => response.headers, :status_code => status}
     end
   end
 
