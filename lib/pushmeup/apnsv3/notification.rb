@@ -37,7 +37,7 @@ module APNSV3
 
     def to_hash
       aps = {}
-      Rails.logger.debug "[Pushmeup::APNSV3::initialize] to_hash #{sound}"
+      Rails.logger.debug "[Pushmeup::APNSV3::to_hash] sound name #{sound}"
       aps.merge!(alert: alert) if alert
       aps.merge!(badge: badge) if badge
       aps.merge!(sound: sound) if sound
