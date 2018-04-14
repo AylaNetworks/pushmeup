@@ -12,7 +12,6 @@ module APNSV3
 
       @device_token = device_token
       @apns_id = SecureRandom.uuid
-      Rails.logger.debug "[Pushmeup::APNSV3::initialize] notification, its a hash #{message.to_s}, just message #{message}"
       if message.is_a?(Hash)
         self.alert = message[:alert]
         self.custom_payload = message[:custom_payload]
@@ -24,7 +23,7 @@ module APNSV3
         self.sound = message[:sound]
         Rails.logger.debug "[Pushmeup::APNSV3::initialize] sound: #{message[:sound]}"
       else
-        Rails.logger.debug "[Pushmeup::APNSV3::initialize] notification not a hash #{message.to_s}, just message #{message}"
+        Rails.logger.debug "[Pushmeup::APNSV3::initialize] notification message string #{message}"
         self.alert = message
       end
     end
@@ -38,7 +37,7 @@ module APNSV3
 
     def to_hash
       aps = {}
-      Rails.logger.debug "[Pushmeup::APNSV3::initialize] to hash #{sound}"
+      Rails.logger.debug "[Pushmeup::APNSV3::initialize] to_hash #{sound}"
       aps.merge!(alert: alert) if alert
       aps.merge!(badge: badge) if badge
       aps.merge!(sound: sound) if sound
