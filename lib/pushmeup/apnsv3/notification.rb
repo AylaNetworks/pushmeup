@@ -4,7 +4,7 @@ require 'json'
 module APNSV3
   class Notification
     attr_reader :device_token
-    attr_accessor :alert, :badge, :sound, :content_available, :category, :custom_payload, :url_args, :mutable_content, :other
+    attr_accessor :alert, :badge, :sound, :content_available, :category, :custom_payload, :url_args, :mutable_content
     attr_accessor :apns_id, :expiration, :priority, :topic, :apns_collapse_id
 
     def initialize(device_token, message)
@@ -22,7 +22,7 @@ module APNSV3
         self.topic = message[:bundle_id]
         self.sound = message[:sound]
         self.badge = message[:badge]
-        self.other = message[:other]
+        self.custom_payload = message[:other]
         Rails.logger.debug "[Pushmeup::APNSV3::initialize] sound: #{message[:sound]}"
       else
         Rails.logger.debug "[Pushmeup::APNSV3::initialize] notification message string #{message}"
@@ -43,7 +43,6 @@ module APNSV3
       aps.merge!(badge: badge) if badge
       aps.merge!(sound: sound) if sound
       aps.merge!(category: category) if category
-      aps.merge!(other: other) if other
       aps.merge!('content-available' => content_available) if content_available
       aps.merge!('url-args' => url_args) if url_args
       aps.merge!('mutable-content' => mutable_content) if mutable_content
