@@ -14,7 +14,6 @@ module APNSV3
       @apns_id = SecureRandom.uuid
       if message.is_a?(Hash)
         self.alert = message[:alert]
-        self.custom_payload = message[:custom_payload]
         self.priority = message[:priority]
         self.expiration = message[:expiration]
         self.apns_collapse_id = message[:apns_collapse_id]
