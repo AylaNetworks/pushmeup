@@ -23,9 +23,9 @@ module APNSV3
         self.sound = message[:sound]
         self.badge = message[:badge]
         self.custom_payload = message[:other]
-        Rails.logger.debug "[Pushmeup::APNSV3::initialize] sound: #{message[:sound]}"
+        Rails.logger.info "[Pushmeup::APNSV3::initialize] sound: #{message[:sound]}"
       else
-        Rails.logger.debug "[Pushmeup::APNSV3::initialize] notification message string #{message}"
+        Rails.logger.info "[Pushmeup::APNSV3::initialize] notification message string #{message}"
         self.alert = message
       end
     end
@@ -49,7 +49,7 @@ module APNSV3
 
       n = {aps: aps}
       n.merge!(custom_payload) if custom_payload
-      Rails.logger.debug "[Pushmeup::APNSV3::to_hash] #{n.to_s} #{n}"
+      Rails.logger.info "[Pushmeup::APNSV3::to_hash] #{n.to_s} #{n}"
       n
     end
   end
