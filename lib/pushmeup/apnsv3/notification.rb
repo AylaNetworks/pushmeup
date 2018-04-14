@@ -1,5 +1,6 @@
 require 'securerandom'
 require 'json'
+require 'logger'
 
 module APNSV3
   class Notification
@@ -48,6 +49,7 @@ module APNSV3
 
       n = {aps: aps}
       n.merge!(custom_payload) if custom_payload
+      Rails.logger.debug "[Pushmeup::APNSV3::to_hash] #{n.to_s} #{n}"
       n
     end
   end
