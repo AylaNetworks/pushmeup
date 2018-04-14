@@ -21,6 +21,7 @@ module APNSV3
         self.apns_collapse_id = message[:apns_collapse_id]
         self.apns_id = message[:apns_id]
         self.topic = message[:bundle_id]
+        self.sound = message[:sound]
       else
         self.alert = message
       end
