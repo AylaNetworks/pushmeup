@@ -1,5 +1,6 @@
 require 'securerandom'
 require 'json'
+require 'logger'
 
 module APNSV3
   class Notification
@@ -12,16 +13,19 @@ module APNSV3
 
       @device_token = device_token
       @apns_id = SecureRandom.uuid
-
       if message.is_a?(Hash)
         self.alert = message[:alert]
-        self.custom_payload = message[:custom_payload]
         self.priority = message[:priority]
         self.expiration = message[:expiration]
         self.apns_collapse_id = message[:apns_collapse_id]
         self.apns_id = message[:apns_id]
         self.topic = message[:bundle_id]
+        self.sound = message[:sound]
+        self.badge = message[:badge]
+        self.custom_payload = message[:other]
+        Rails.logger.info "[Pushmeup::APNSV3::initialize] sound: #{message[:sound]}"
       else
+        Rails.logger.info "[Pushmeup::APNSV3::initialize] notification message string #{message}"
         self.alert = message
       end
     end
@@ -35,7 +39,6 @@ module APNSV3
 
     def to_hash
       aps = {}
-
       aps.merge!(alert: alert) if alert
       aps.merge!(badge: badge) if badge
       aps.merge!(sound: sound) if sound
@@ -46,6 +49,7 @@ module APNSV3
 
       n = {aps: aps}
       n.merge!(custom_payload) if custom_payload
+      Rails.logger.info "[Pushmeup::APNSV3::to_hash] #{n.to_s} #{n}"
       n
     end
   end
