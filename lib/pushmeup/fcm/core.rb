@@ -26,11 +26,11 @@ module FCM
 
   def self.send_notifications(registration_ids, data={}, options = {})
     notification = Notification.new(registration_ids, data, options)
-    self.prepare_and_send(notification)
+    self.prepare_and_send(notification, options)
   end
 
 
-  def self.prepare_and_send(notification)
+  def self.prepare_and_send(notification, options = {})
     registration_ids = notification.registration_ids
 
     Rails.logger.info "[Pushmeup::FCM::prepare_and_send] registartion_ids #{registration_ids}"
@@ -38,11 +38,11 @@ module FCM
     post_body = build_post_body(registration_ids, notification.get_options)
 
     Rails.logger.info "[Pushmeup::FCM::prepare_and_send] request body json #{post_body.to_json}"
-
+    api_key = options[:api_key] || @api_key
     params = {
         body: post_body.to_json,
         headers: {
-            'Authorization' => "key=#{@api_key}",
+            'Authorization' => "key=#{api_key}",
             'Content-Type' => 'application/json'
         }
     }
