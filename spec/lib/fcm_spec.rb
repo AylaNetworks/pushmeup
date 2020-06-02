@@ -97,6 +97,20 @@ describe 'Pushmeup FCM' do
           FCM.send_notification(registration_ids, {score: '345', time: '12:20'}, {})
           stub_with_data.should have_been_made.times(1)
         end
+
+        it "should set priority high in the options" do 
+          notification = FCM::Notification.new(registration_ids, {score: '345', time: '12:20'}, {priority: true})
+          options = notification.get_options
+          options[:android][:priority].should eq("high")
+          options[:priority].should eq("high")
+        end
+
+        it "should not set priority high in the options if no priority is given" do 
+          notification = FCM::Notification.new(registration_ids, {score: '345', time: '12:20'}, {})
+          options = notification.get_options
+          options[:android].should be_nil
+          options[:priority].should be_nil
+        end
       end
 
       context 'when send_notification fails' do
