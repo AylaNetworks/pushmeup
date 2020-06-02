@@ -1,7 +1,7 @@
 module FCM
 
   class Notification
-    attr_accessor :registration_ids, :data, :collapse_key, :time_to_live, :delay_while_idle, :identity, :condition
+    attr_accessor :registration_ids, :data, :collapse_key, :time_to_live, :delay_while_idle, :identity, :condition, :priority
 
     def initialize(registration_ids, data, options = {})
       self.registration_ids = registration_ids
@@ -12,6 +12,7 @@ module FCM
       @delay_while_idle = options[:delay_while_idle]
       @identity = options[:identity]
       @condition = options[:conditions]
+      @priority = options[:priority] || false
     end
 
     def registration_ids=(registration_ids)
@@ -36,6 +37,10 @@ module FCM
       @delay_while_idle = (delay_while_idle == true || delay_while_idle == :true)
     end
 
+    def priority=(delay_while_idle)
+      @priority = (priority == true || priority == :true)
+    end
+
     def time_to_live=(time_to_live)
       if time_to_live.is_a?(Integer)
         @time_to_live = time_to_live
@@ -55,6 +60,10 @@ module FCM
       options[:collapse_key] = self.collapse_key if self.collapse_key
       options[:identity] = self.identity if self.identity
       options[:data] = self.data if self.data_present?
+      if self.priority
+        options[:android] = { priority: "high" }
+        options[:priority] = "high"
+      end
       options
     end
 
